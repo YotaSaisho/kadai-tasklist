@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Task;    
 
+use Illuminate\Support\Facades\Auth; // 追加
+
 class TasksController extends Controller
 {
     /**
@@ -18,12 +20,17 @@ class TasksController extends Controller
         $data = [];
         if (\Auth::check()) {
             $user = \Auth::user();
-            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
-            
-            $data = [
-                'user' => $user,
-                'tasks' => $tasks,
-            ];
+            if (Auth::id() == $user->id){
+                $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+                
+                $data = [
+                    'user' => $user,
+                    'tasks' => $tasks,
+                ];
+            }
+            else{
+                return redirect('/');
+            }
         }
         
         return view('welcome', $data);

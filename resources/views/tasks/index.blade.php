@@ -25,6 +25,7 @@
                 @endforeach
             </tbody>
         </table>
+    @else <h3>タスクはありません</h3>
     @endif
     
     {!! link_to_route('tasks.create', '新規タスク作成', [], ['class' => 'btn btn-primary']) !!}
