@@ -8,6 +8,8 @@ use App\Task;
 
 use Illuminate\Support\Facades\Auth; // 追加
 
+use App\User; // 追加
+
 class TasksController extends Controller
 {
     /**
@@ -20,19 +22,13 @@ class TasksController extends Controller
         $data = [];
         if (\Auth::check()) {
             $user = \Auth::user();
-            if (Auth::id() == $user->id){
-                $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
-                
-                $data = [
-                    'user' => $user,
-                    'tasks' => $tasks,
-                ];
-            }
-            else{
-                return redirect('/');
-            }
+            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+            
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
         }
-        
         return view('welcome', $data);
     }
 
@@ -82,11 +78,18 @@ class TasksController extends Controller
     public function show($id)
     {
         $task = Task::find($id);
-
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
+        $user_id = $task->user_id;
+        if (Auth::id() == $user_id){
+            return view('tasks.show', [
+                'task' => $task,
+            ]);
+        }
+        else{
+            return redirect('/');
+        }
     }
+    
+
 
     /**
      * Show the form for editing the specified resource.
@@ -97,10 +100,15 @@ class TasksController extends Controller
     public function edit($id)
     {
         $task = Task::find($id);
-
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
+        $user_id = $task->user_id;
+        if (Auth::id() == $user_id){
+            return view('tasks.edit', [
+                'task' => $task,
+            ]);
+        }
+        else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -121,12 +129,18 @@ class TasksController extends Controller
 
         
         $task = Task::find($id);
-        $task->title = $request->title;    // 追加
-        $task->status = $request->status;    // 追加
-        $task->content = $request->content;
-        $task->save();
+        $user_id = $task->user_id;
+        if (Auth::id() == $user_id){
+            $task->title = $request->title;    // 追加
+            $task->status = $request->status;    // 追加
+            $task->content = $request->content;
+            $task->save();
 
-        return redirect('/');
+            return redirect('/');
+        }
+        else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -138,8 +152,13 @@ class TasksController extends Controller
     public function destroy($id)
     {
         $task = Task::find($id);
-        $task->delete();
-
-        return redirect('/');
+        $user_id = $task->user_id;
+        if (Auth::id() == $user_id){
+            $task->delete();
+            return redirect('/');
+        }
+        else{
+            return redirect('/');
+        }
     }
 }
